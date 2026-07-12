@@ -148,3 +148,16 @@ demo/
 │   └── static/          # Frontend (HTML, CSS, JS)
 └── pom.xml
 ```
+
+
+## Working
+<img width="1851" height="817" alt="image" src="https://github.com/user-attachments/assets/312054a6-324e-409a-83ec-f71ab9b9881c" />
+
+<img width="1887" height="879" alt="image" src="https://github.com/user-attachments/assets/a9ce5b79-93d2-4f53-8444-daf5272557f0" />
+
+<img width="1879" height="889" alt="image" src="https://github.com/user-attachments/assets/e5b641d3-ed4f-4e05-9fc4-ea9a2cb6bdd9" />
+
+<img width="1883" height="587" alt="image" src="https://github.com/user-attachments/assets/066f5227-53c1-48fc-871d-2f3b9d9d8909" />
+
+<img width="1564" height="698" alt="image" src="https://github.com/user-attachments/assets/c01cba38-6947-4d28-9bec-7a0688069a08" />
+
