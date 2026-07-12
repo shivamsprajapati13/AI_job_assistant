@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Assistant</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="logo">&#x1F4BC;</span>
+            <span>JobApply AI</span>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link active" data-page="apply">Apply</a>
+            <a href="/profile" class="nav-link" data-page="profile">Profile</a>
+            <a href="/history" class="nav-link" data-page="history">History</a>
+        </div>
+        <div class="nav-actions">
+            <div class="provider-select-wrap">
+                <label for="aiProviderSelect" class="provider-label">AI</label>
+                <select id="aiProviderSelect" class="provider-select" title="Choose AI provider"></select>
+            </div>
+            <span id="gmailStatus" class="gmail-badge disconnected">Gmail: Not Connected</span>
+            <a href="/oauth2/authorization/google" class="btn btn-outline btn-sm" id="connectGmailBtn">Connect Gmail</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Apply Page -->
+        <section id="applyPage" class="page active">
+            <header class="page-header">
+                <h1>Apply to Jobs with AI</h1>
+                <p>Upload a hiring post screenshot and let AI handle the rest</p>
+            </header>
+
+            <div class="workflow">
+                <!-- Step 1: Upload -->
+                <div class="card step-card" id="stepUpload">
+                    <div class="step-header">
+                        <span class="step-number">1</span>
+                        <h2>Upload Hiring Post</h2>
+                    </div>
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" id="screenshotInput" accept="image/*" hidden>
+                        <div class="upload-content">
+                            <span class="upload-icon">&#x1F4F7;</span>
+                            <p>Drop, <button type="button" class="link-btn" onclick="document.getElementById('screenshotInput').click()">browse</button>, or <strong>Ctrl+V</strong> to paste</p>
+                            <small>Supports LinkedIn, X, WhatsApp, Telegram, Slack, and more</small>
+                        </div>
+                        <img id="previewImage" class="preview-image hidden" alt="Screenshot preview">
+                    </div>
+                    <button class="btn btn-primary" id="extractBtn" disabled>Extract Job Details</button>
+                </div>
+
+                <!-- Step 2: Review -->
+                <div class="card step-card hidden" id="stepReview">
+                    <div class="step-header">
+                        <span class="step-number">2</span>
+                        <h2>Review Extracted Details</h2>
+                    </div>
+                    <form id="jobDetailsForm" class="form-grid">
+                        <div class="form-group">
+                            <label for="companyName">Company</label>
+                            <input type="text" id="companyName" name="companyName">
+                        </div>
+                        <div class="form-group">
+                            <label for="jobTitle">Job Title</label>
+                            <input type="text" id="jobTitle" name="jobTitle">
+                        </div>
+                        <div class="form-group">
+                            <label for="requiredExperience">Experience Required</label>
+                            <input type="text" id="requiredExperience" name="requiredExperience">
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" name="location">
+                        </div>
+                        <div class="form-group">
+                            <label for="recruiterEmail">Recruiter Email</label>
+                            <input type="email" id="recruiterEmail" name="recruiterEmail">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="requiredSkills">Required Skills (comma-separated)</label>
+                            <input type="text" id="requiredSkills" name="requiredSkills">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="applicationInstructions">Application Instructions</label>
+                            <textarea id="applicationInstructions" name="applicationInstructions" rows="2"></textarea>
+                        </div>
+                    </form>
+
+                    <div id="matchAnalysis" class="match-analysis hidden">
+                        <div class="match-score-ring">
+                            <span id="matchScoreValue">0</span>%
+                            <small>Match</small>
+                        </div>
+                        <div class="match-details">
+                            <div class="skill-group">
+                                <h4>Matched Skills</h4>
+                                <div id="matchedSkills" class="skill-tags"></div>
+                            </div>
+                            <div class="skill-group">
+                                <h4>Missing Skills</h4>
+                                <div id="missingSkills" class="skill-tags missing"></div>
+                            </div>
+                            <div class="skill-group">
+                                <h4>Key Keywords</h4>
+                                <div id="highlightedKeywords" class="skill-tags keywords"></div>
+                            </div>
+                            <p id="matchSummary" class="match-summary"></p>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn btn-secondary" id="analyzeBtn">Analyze Match</button>
+                        <button class="btn btn-primary" id="generateEmailBtn">Generate Email</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Email -->
+                <div class="card step-card hidden" id="stepEmail">
+                    <div class="step-header">
+                        <span class="step-number">3</span>
+                        <h2>Edit & Send Application</h2>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailSubject">Subject</label>
+                        <input type="text" id="emailSubject" name="emailSubject">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailBody">Email Body</label>
+                        <textarea id="emailBody" name="emailBody" rows="12"></textarea>
+                    </div>
+                    <div class="step-actions">
+                        <button class="btn btn-secondary" id="saveDraftBtn">Save Draft</button>
+                        <button class="btn btn-primary" id="sendEmailBtn">Send Application</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Page -->
+        <section id="profilePage" class="page hidden">
+            <header class="page-header">
+                <h1>Your Profile</h1>
+                <p>Set up your profile and upload your resume for personalized applications</p>
+                <p id="profileLoadStatus" class="profile-status hidden"></p>
+            </header>
+            <div class="card" id="profileCard">
+                <div id="profileLoading" class="profile-loading">
+                    <div class="spinner"></div>
+                    <p>Loading your profile...</p>
+                </div>
+                <div id="profileContent" class="hidden">
+                <form id="profileForm" class="form-grid">
+                    <div class="form-group">
+                        <label for="profileEmail">Email</label>
+                        <input type="email" id="profileEmail" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName">
+                    </div>
+                    <div class="form-group">
+                        <label for="currentTitle">Current Title</label>
+                        <input type="text" id="currentTitle" name="currentTitle">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedinUrl">LinkedIn URL</label>
+                        <input type="url" id="linkedinUrl" name="linkedinUrl">
+                    </div>
+                    <div class="form-group">
+                        <label for="githubUrl">GitHub URL</label>
+                        <input type="url" id="githubUrl" name="githubUrl">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="summary">Professional Summary</label>
+                        <textarea id="summary" name="summary" rows="3"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="skills">Skills (comma-separated)</label>
+                        <input type="text" id="skills" name="skills">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="experience">Experience</label>
+                        <textarea id="experience" name="experience" rows="4"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="education">Education</label>
+                        <textarea id="education" name="education" rows="2"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="preferredAiProvider">Preferred AI Provider</label>
+                        <select id="preferredAiProvider" name="preferredAiProvider"></select>
+                        <small class="field-hint">Used by default for extraction, match analysis, and email generation</small>
+                    </div>
+                </form>
+
+                <div class="resume-upload">
+                    <h3>Resume</h3>
+                    <div class="upload-zone small" id="resumeUploadZone">
+                        <input type="file" id="resumeInput" accept=".pdf,.doc,.docx,.txt" hidden>
+                        <p id="resumeStatus">No resume uploaded</p>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('resumeInput').click()">Upload Resume</button>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="saveProfileBtn">Save Profile</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Page -->
+        <section id="historyPage" class="page hidden">
+            <header class="page-header">
+                <h1>Application History</h1>
+                <p>Track all your job applications sent through the platform</p>
+            </header>
+            <div id="historyList" class="history-list">
+                <p class="empty-state">No applications yet. Start by applying to a job!</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Draft View/Edit Modal -->
+    <div id="draftModal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeDraftModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="draftModalTitle">Application Draft</h2>
+                <button type="button" class="modal-close" onclick="closeDraftModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="draftViewMode" class="draft-view hidden">
+                    <div class="draft-meta">
+                        <p><strong>Company:</strong> <span id="viewCompany"></span></p>
+                        <p><strong>Job Title:</strong> <span id="viewJobTitle"></span></p>
+                        <p><strong>Location:</strong> <span id="viewLocation"></span></p>
+                        <p><strong>To:</strong> <span id="viewRecipient"></span></p>
+                        <p><strong>Subject:</strong> <span id="viewSubject"></span></p>
+                    </div>
+                    <div class="draft-email-preview" id="viewBody"></div>
+                    <p class="field-hint" id="viewResumeHint">Resume will be attached automatically when you send.</p>
+                </div>
+                <form id="draftEditForm" class="draft-edit hidden">
+                    <div class="form-group">
+                        <label for="editCompany">Company</label>
+                        <input type="text" id="editCompany">
+                    </div>
+                    <div class="form-group">
+                        <label for="editJobTitle">Job Title</label>
+                        <input type="text" id="editJobTitle">
+                    </div>
+                    <div class="form-group">
+                        <label for="editLocation">Location</label>
+                        <input type="text" id="editLocation">
+                    </div>
+                    <div class="form-group">
+                        <label for="editRecipient">Recruiter Email</label>
+                        <input type="email" id="editRecipient">
+                    </div>
+                    <div class="form-group">
+                        <label for="editSubject">Subject</label>
+                        <input type="text" id="editSubject">
+                    </div>
+                    <div class="form-group">
+                        <label for="editBody">Email Body</label>
+                        <textarea id="editBody" rows="10"></textarea>
+                    </div>
+                    <p class="field-hint">Your uploaded resume will be attached when you send this email.</p>
+                </form>
+            </div>
+            <div class="modal-footer" id="draftModalFooter">
+                <button type="button" class="btn btn-secondary" onclick="closeDraftModal()">Close</button>
+                <button type="button" class="btn btn-secondary hidden" id="editFromViewBtn">Edit</button>
+                <button type="button" class="btn btn-secondary hidden" id="saveDraftEditBtn">Save Changes</button>
+                <button type="button" class="btn btn-outline hidden" id="deleteDraftBtn">Delete Draft</button>
+                <button type="button" class="btn btn-primary hidden" id="sendDraftBtn">Send Email</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p id="loadingText">Processing...</p>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

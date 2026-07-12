@@ -1,0 +1,7 @@
+.idea/
+data/
+uploads/
+target/
+.env
+.env.local
+.env.*.local
